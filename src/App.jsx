@@ -3,6 +3,7 @@ import Header from './components/Header';
 import RingkasanFilm from './components/RingkasanFilm';
 import FormTambahFilm from './components/FormTambahFilm';
 import DaftarFilm from './components/DaftarFilm';
+import RekomendasiFilmAPI from './components/RekomendasiFilmAPI';
 import './App.css';
 
 const DATA_AWAL_FILM = [
@@ -115,6 +116,7 @@ export default function App() {
           onHapusFilm={handleHapusFilm}
           onToggleStatus={handleToggleStatus}
         />
+        <RekomendasiFilmAPI onImportFilm={handleTambahFilm} />
       </main>
 
       <footer className="site-footer">
