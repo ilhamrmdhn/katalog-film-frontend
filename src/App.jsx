@@ -122,7 +122,7 @@ export default function App() {
           className={`tab-btn ${activeTab === 'eksplorasi' ? 'active' : ''}`}
           onClick={() => setActiveTab('eksplorasi')}
         >
-          Eksplorasi Film (API)
+          Eksplorasi Film
         </button>
       </div>
 

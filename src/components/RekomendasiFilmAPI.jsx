@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Search, RotateCcw, AlertCircle, Plus, Star } from 'lucide-react';
 
 export default function RekomendasiFilmAPI({ onImportFilm }) {
-  const [keyword, setKeyword] = useState('marvel');
-  const [inputCari, setInputCari] = useState('marvel');
+  const [keyword, setKeyword] = useState('');
+  const [inputCari, setInputCari] = useState('');
   const [daftarAPI, setDaftarAPI] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -13,14 +13,21 @@ export default function RekomendasiFilmAPI({ onImportFilm }) {
     setErrorMessage(null);
 
     try {
-      const response = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(queryParam)}`);
+      const url = queryParam.trim()
+        ? `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(queryParam)}`
+        : 'https://api.tvmaze.com/shows';
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error(`HTTP Error! Status: ${response.status}`);
       }
 
       const hasil = await response.json();
-      setDaftarAPI(hasil);
+      const listNormal = hasil.map((item) => (item.show ? item.show : item));
+      const hasilTampil = queryParam.trim() ? listNormal : listNormal.slice(0, 12);
+      
+      setDaftarAPI(hasilTampil);
     } catch (err) {
       setErrorMessage(err.message || 'Gagal mengambil data dari API eksternal.');
     } finally {
@@ -34,13 +41,10 @@ export default function RekomendasiFilmAPI({ onImportFilm }) {
 
   const handleCari = (e) => {
     e.preventDefault();
-    if (inputCari.trim()) {
-      setKeyword(inputCari.trim());
-    }
+    setKeyword(inputCari.trim());
   };
 
-  const handleTambahKeKatalog = (item) => {
-    const show = item.show;
+  const handleTambahKeKatalog = (show) => {
     const sinopsisBersih = show.summary
       ? show.summary.replace(/<[^>]+>/g, '').trim()
       : 'Sinopsis tidak tersedia.';
@@ -64,14 +68,14 @@ export default function RekomendasiFilmAPI({ onImportFilm }) {
     <section className="catalog-section">
       <div className="section-bar">
         <div>
-          <h2 className="section-heading">Eksplorasi Film (API Publik)</h2>
-          <p className="section-subheading">Data real-time diambil secara asinkron dari TVMaze REST API</p>
+          <h2 className="section-heading">Eksplorasi Film</h2>
+          <p className="section-subheading">Data real-time diambil dari TVMaze REST API</p>
         </div>
 
         <form onSubmit={handleCari} className="api-search-form">
           <input
             type="text"
-            placeholder="Cari film di API..."
+            placeholder="Cari judul film..."
             value={inputCari}
             onChange={(e) => setInputCari(e.target.value)}
             className="api-search-input"
@@ -116,8 +120,7 @@ export default function RekomendasiFilmAPI({ onImportFilm }) {
 
       {!isLoading && !errorMessage && daftarAPI.length > 0 && (
         <div className="movie-grid">
-          {daftarAPI.map((item) => {
-            const show = item.show;
+          {daftarAPI.map((show) => {
             const studio = show.network ? show.network.name : (show.webChannel ? show.webChannel.name : 'Studio Eksternal');
             const genre = show.genres && show.genres.length > 0 ? show.genres[0] : 'Umum';
             const year = show.premiered ? show.premiered.slice(0, 4) : '-';
@@ -145,15 +148,12 @@ export default function RekomendasiFilmAPI({ onImportFilm }) {
                     <span className="rating-score">{ratingScore}</span>
                     <span className="rating-max">/10</span>
                   </div>
-                  <span className="status-pill pill-unwatched">
-                    TVMaze API
-                  </span>
                 </div>
 
                 <div className="card-actions">
                   <button
                     type="button"
-                    onClick={() => handleTambahKeKatalog(item)}
+                    onClick={() => handleTambahKeKatalog(show)}
                     className="btn-action btn-import-action"
                     title="Tambahkan film ini ke koleksi saya"
                   >
