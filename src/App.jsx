@@ -77,6 +77,7 @@ const DATA_AWAL_FILM = [
 
 export default function App() {
   const [daftarFilm, setDaftarFilm] = useState(DATA_AWAL_FILM);
+  const [activeTab, setActiveTab] = useState('koleksi');
 
   const handleTambahFilm = (filmBaru) => {
     setDaftarFilm((prevDaftar) => [filmBaru, ...prevDaftar]);
@@ -108,15 +109,37 @@ export default function App() {
     <div className="site-wrapper">
       <Header />
 
+      <div className="tab-navigation">
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'koleksi' ? 'active' : ''}`}
+          onClick={() => setActiveTab('koleksi')}
+        >
+          Koleksi Film ({daftarFilm.length})
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'eksplorasi' ? 'active' : ''}`}
+          onClick={() => setActiveTab('eksplorasi')}
+        >
+          Eksplorasi Film (API)
+        </button>
+      </div>
+
       <main className="main-layout">
-        <RingkasanFilm daftarFilm={daftarFilm} />
-        <FormTambahFilm onTambahFilm={handleTambahFilm} />
-        <DaftarFilm
-          daftarFilm={daftarFilm}
-          onHapusFilm={handleHapusFilm}
-          onToggleStatus={handleToggleStatus}
-        />
-        <RekomendasiFilmAPI onImportFilm={handleTambahFilm} />
+        {activeTab === 'koleksi' ? (
+          <>
+            <RingkasanFilm daftarFilm={daftarFilm} />
+            <FormTambahFilm onTambahFilm={handleTambahFilm} />
+            <DaftarFilm
+              daftarFilm={daftarFilm}
+              onHapusFilm={handleHapusFilm}
+              onToggleStatus={handleToggleStatus}
+            />
+          </>
+        ) : (
+          <RekomendasiFilmAPI onImportFilm={handleTambahFilm} />
+        )}
       </main>
 
       <footer className="site-footer">

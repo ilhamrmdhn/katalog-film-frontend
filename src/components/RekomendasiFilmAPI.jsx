@@ -48,7 +48,7 @@ export default function RekomendasiFilmAPI({ onImportFilm }) {
     const filmBaru = {
       id: Date.now(),
       judul: show.name,
-      sutradara: show.network ? show.network.name : 'Studio Eksternal',
+      sutradara: show.network ? show.network.name : (show.webChannel ? show.webChannel.name : 'Studio Eksternal'),
       genre: show.genres && show.genres.length > 0 ? show.genres[0] : 'Umum',
       tahun: show.premiered ? parseInt(show.premiered.slice(0, 4), 10) : new Date().getFullYear(),
       rating: show.rating && show.rating.average ? show.rating.average : 7.5,
@@ -57,10 +57,11 @@ export default function RekomendasiFilmAPI({ onImportFilm }) {
     };
 
     onImportFilm(filmBaru);
+    alert(`"${show.name}" berhasil ditambahkan ke Koleksi Saya!`);
   };
 
   return (
-    <section className="api-section">
+    <section className="catalog-section">
       <div className="section-bar">
         <div>
           <h2 className="section-heading">Eksplorasi Film (API Publik)</h2>
@@ -114,49 +115,57 @@ export default function RekomendasiFilmAPI({ onImportFilm }) {
       )}
 
       {!isLoading && !errorMessage && daftarAPI.length > 0 && (
-        <div className="api-movie-grid">
-          {daftarAPI.map((item) => (
-            <article key={item.show.id} className="api-card">
-              <div className="api-card-top">
-                <span className="api-genre">
-                  {item.show.genres && item.show.genres.length > 0
-                    ? item.show.genres[0]
-                    : 'Umum'}
-                </span>
-                <span className="api-year">
-                  {item.show.premiered ? item.show.premiered.slice(0, 4) : '-'}
-                </span>
-              </div>
+        <div className="movie-grid">
+          {daftarAPI.map((item) => {
+            const show = item.show;
+            const studio = show.network ? show.network.name : (show.webChannel ? show.webChannel.name : 'Studio Eksternal');
+            const genre = show.genres && show.genres.length > 0 ? show.genres[0] : 'Umum';
+            const year = show.premiered ? show.premiered.slice(0, 4) : '-';
+            const ratingScore = show.rating && show.rating.average ? show.rating.average : '7.5';
+            const synopsis = show.summary
+              ? show.summary.replace(/<[^>]+>/g, '').trim()
+              : 'Sinopsis tidak tersedia.';
 
-              <h4 className="api-title">{item.show.name}</h4>
-
-              <p className="api-summary">
-                {item.show.summary
-                  ? item.show.summary.replace(/<[^>]+>/g, '').trim()
-                  : 'Tidak ada sinopsis tersedia.'}
-              </p>
-
-              <div className="api-card-bottom">
-                <div className="api-rating">
-                  <Star size={13} className="star-fill" />
-                  <span>{item.show.rating && item.show.rating.average ? item.show.rating.average : '-'}</span>
+            return (
+              <article key={show.id} className="movie-card">
+                <div className="card-top">
+                  <div className="card-heading">
+                    <span className="genre-pill">{genre}</span>
+                    <h3 className="movie-title">{show.name}</h3>
+                    <p className="movie-director">Oleh {studio}</p>
+                  </div>
+                  <span className="year-pill">{year}</span>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleTambahKeKatalog(item)}
-                  className="btn-import"
-                  title="Tambahkan ke katalog pribadi Anda"
-                >
-                  <Plus size={13} />
-                  <span>Koleksi</span>
-                </button>
-              </div>
-            </article>
-          ))}
+                <p className="movie-synopsis">{synopsis}</p>
+
+                <div className="card-meta">
+                  <div className="rating-tag">
+                    <Star size={14} className="star-fill" />
+                    <span className="rating-score">{ratingScore}</span>
+                    <span className="rating-max">/10</span>
+                  </div>
+                  <span className="status-pill pill-unwatched">
+                    TVMaze API
+                  </span>
+                </div>
+
+                <div className="card-actions">
+                  <button
+                    type="button"
+                    onClick={() => handleTambahKeKatalog(item)}
+                    className="btn-action btn-import-action"
+                    title="Tambahkan film ini ke koleksi saya"
+                  >
+                    <Plus size={14} />
+                    <span>Tambahkan ke Koleksi</span>
+                  </button>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </section>
   );
 }
-
